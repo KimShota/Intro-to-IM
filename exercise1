@@ -1,0 +1,38 @@
+int lightSensor = A0;  // your only sensor
+
+int leftVal = 0;
+int rightVal = 0;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(lightSensor, INPUT);
+}
+
+void loop() {
+  // Read the light sensor (0–1023)
+  int rVal = analogRead(lightSensor);
+
+  // Send rVal + dummy 0 to match p5.js format
+  Serial.print(rVal);
+  Serial.print(",");
+  Serial.println(0);
+
+  // --------------------------
+  // Receive data from p5.js
+  // --------------------------
+  if (Serial.available()) {
+    String msg = Serial.readStringUntil('\n');
+    msg.trim();
+
+    int commaIndex = msg.indexOf(',');
+    if (commaIndex > 0) {
+      leftVal  = msg.substring(0, commaIndex).toInt();
+      rightVal = msg.substring(commaIndex + 1).toInt();
+    }
+
+    // You don't use leftVal or rightVal anymore,
+    // but we keep receiving them so p5.js doesn't break.
+  }
+
+  delay(20);
+}
