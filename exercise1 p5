@@ -1,0 +1,70 @@
+
+
+let rVal = 0;
+let left = 0;
+let right = 0;
+
+let port;
+let baudrate = 9600;
+
+function setup() {
+  createCanvas(640, 480);
+  textSize(18);
+
+  port = createSerial();
+
+  let usedPorts = usedSerialPorts();
+  if (usedPorts.length > 0) {
+    port.open(usedPorts[0], baudrate);
+  }
+}
+
+function setupSerial() {
+  if (!port.opened()) {
+    port.open("Arduino", baudrate);
+  } else {
+    port.close();
+  }
+}
+
+function draw() {
+  background(map(rVal, 0, 1023, 0, 255), 255, 255);
+
+  if (!port.opened()) {
+    text("Disconnected - press SPACE to connect", 20, 30);
+  } else {
+    text("Connected - press SPACE to disconnect", 20, 30);
+
+    // READ FROM ARDUINO
+    let data = port.readUntil("\n");
+    if (data.length > 0) {
+      rVal = int(trim(data));  // only ONE value now
+
+      // SEND BACK TO ARDUINO
+      let msg = left + "," + right + "\n";
+      port.write(msg);
+    }
+
+    text("rVal = " + rVal, 20, 50);
+  }
+
+  // ELLIPSE controlled by light sensor
+  let xpos = map(rVal, 550, 900, 0, width);
+  fill(0, 0, 255);
+  ellipse(xpos, height / 2, 100, 50);
+
+  // mouse interaction
+  if (mouseIsPressed) {
+    if (mouseX <= width / 2) left = 1;
+    else right = 1;
+  } else {
+    left = 0;
+    right = 0;
+  }
+}
+
+function keyPressed() {
+  if (key == " ") {
+    setupSerial();
+  }
+}
