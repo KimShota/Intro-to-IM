@@ -1,0 +1,27 @@
+int potPin = A0;
+int ledPin = 5;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(ledPin, OUTPUT);
+}
+
+void loop() {
+  // Read potentiometer
+  int potValue = analogRead(potPin);
+
+  // Send to p5.js
+  Serial.println(potValue);
+
+  // Check if p5.js sent LED command
+  if (Serial.available()) {
+    char cmd = Serial.read();
+    if (cmd == '1') {
+      digitalWrite(ledPin, HIGH);
+    } else if (cmd == '0') {
+      digitalWrite(ledPin, LOW);
+    }
+  }
+
+  delay(20);
+}
