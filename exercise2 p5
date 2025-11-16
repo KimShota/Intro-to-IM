@@ -1,0 +1,61 @@
+let port;
+let baudrate = 9600;
+
+let brightnessSlider;
+let brightnessValue = 0;
+
+function setup() {
+  createCanvas(400, 400);
+  textSize(18);
+
+  // Create slider (0–255)
+  brightnessSlider = createSlider(0, 255, 0);
+  brightnessSlider.position(30, height / 2);
+  brightnessSlider.style('width', '200px');
+
+  // Create serial port
+  port = createSerial();
+
+  // Auto-reconnect if previously used
+  let usedPorts = usedSerialPorts();
+  if (usedPorts.length > 0) {
+    port.open(usedPorts[0], baudrate);
+  }
+}
+
+function draw() {
+  background(240);
+
+  fill('red');
+  text("Controlling LED Brightness with Slider!", 20, 40);
+  text("Brightness: " + brightnessValue, 20, 140);
+
+  // Read slider
+  brightnessValue = brightnessSlider.value();
+
+  // If serial is open → send brightness
+  if (port.opened()) {
+    let msg = brightnessValue + "\n";
+    port.write(msg);
+  }
+
+  // Connection status
+  if (!port.opened()) {
+    fill(200, 0, 0);
+    text("Disconnected - press SPACE to connect", 20, 20);
+  } else {
+    fill(0, 150, 0);
+    text("Connected - press SPACE to disconnect", 20, 20);
+  }
+}
+
+// Press space to connect / disconnect
+function keyPressed() {
+  if (key === " ") {
+    if (!port.opened()) {
+      port.open("Arduino", baudrate);
+    } else {
+      port.close();
+    }
+  }
+}
