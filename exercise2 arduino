@@ -1,14 +1,19 @@
-int ledPin = 9; // must be PWM pin
+int ledPin = 9;
 
 void setup() {
   Serial.begin(9600);
+  //set the led pin to the output mode, meaning the electricity will be sent out from the pin
   pinMode(ledPin, OUTPUT);
 }
 
 void loop() {
+  //if there is data waiting in the serial buffer which is inside the arduino
   if (Serial.available()) {
+    //read the data from p5 and convert it into integer 
     int brightness = Serial.parseInt();
+    //make sure that brightness value stays within valid LED PWM range 
     brightness = constrain(brightness, 0, 255);
+    //light up the led 
     analogWrite(ledPin, brightness);
   }
 }

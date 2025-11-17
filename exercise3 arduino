@@ -3,20 +3,25 @@ int ledPin = 5;
 
 void setup() {
   Serial.begin(9600);
+  //set the led pin to output mode 
   pinMode(ledPin, OUTPUT);
 }
 
 void loop() {
-  // Read potentiometer
+  //read the potentiometer value from A0
   int potValue = analogRead(potPin);
 
-  // Send to p5.js
+  //send the potentiometer value to p5 by converting the value into text, sending it through USB serial, and ending the message with newline
   Serial.println(potValue);
 
   // Check if p5.js sent LED command
+  //if there is any data waiting in the serial buffer 
   if (Serial.available()) {
+    //read one character from the serial buffer
     char cmd = Serial.read();
+    //if p5 sends 1
     if (cmd == '1') {
+      //light the LED on 
       digitalWrite(ledPin, HIGH);
     } else if (cmd == '0') {
       digitalWrite(ledPin, LOW);

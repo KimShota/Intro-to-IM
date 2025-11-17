@@ -8,15 +8,17 @@ function setup() {
   createCanvas(400, 400);
   textSize(18);
 
-  // Create slider (0–255)
+  //create the slider 
   brightnessSlider = createSlider(0, 255, 0);
+  //set the position of the slider 
   brightnessSlider.position(30, height / 2);
+  //set the slider's width to 200px 
   brightnessSlider.style('width', '200px');
 
-  // Create serial port
+  //create the serial port 
   port = createSerial();
 
-  // Auto-reconnect if previously used
+  //automatically connect to the previous port 
   let usedPorts = usedSerialPorts();
   if (usedPorts.length > 0) {
     port.open(usedPorts[0], baudrate);
@@ -30,16 +32,18 @@ function draw() {
   text("Controlling LED Brightness with Slider!", 20, 40);
   text("Brightness: " + brightnessValue, 20, 140);
 
-  // Read slider
+  //read the slider value 
   brightnessValue = brightnessSlider.value();
 
-  // If serial is open → send brightness
+  //if the port is open
   if (port.opened()) {
+    //store the brightness value from the slider 
     let msg = brightnessValue + "\n";
+    //send it to Arduino
     port.write(msg);
   }
 
-  // Connection status
+  //print the status of the port 
   if (!port.opened()) {
     fill(200, 0, 0);
     text("Disconnected - press SPACE to connect", 20, 20);
@@ -49,7 +53,7 @@ function draw() {
   }
 }
 
-// Press space to connect / disconnect
+//press space to connect or disconnect 
 function keyPressed() {
   if (key === " ") {
     if (!port.opened()) {

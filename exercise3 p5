@@ -7,22 +7,28 @@ let drag = 0.99;
 let mass = 50;
 
 let port;
-let sensorValue = 512;   // default middle
-let ledState = 0;        // 0 = off, 1 = on
+let sensorValue = 512; //set the value to middle 
+let ledState = 0; //0 means off, 1 means on 
 
 function setup() {
   createCanvas(640, 360);
   noFill();
 
-  // --- physics ---
+  //the ball starts at the center of the very top
   position = createVector(width / 2, 0);
+  //ball starts not moving
   velocity = createVector(0, 0);
+  //ball is not being accelerated
   acceleration = createVector(0, 0);
+  //no horizontal pull but vertical strong pull 
   gravity = createVector(0, 0.5 * mass);
+  //wind force is set to 0
   wind = createVector(0, 0);
 
-  // --- serial ---
+  //create serial port 
   port = createSerial();
+
+  //connect to previous port 
   let used = usedSerialPorts();
   if (used.length > 0) {
     port.open(used[0], 9600);
@@ -32,47 +38,62 @@ function setup() {
 function draw() {
   background(255);
 
-  // ---- read sensor ----
+  //read the value coming to the port from arduino
   if (port.available() > 0) {
+    //store the data until the newline character
     let line = port.readUntil("\n");
     if (line.length > 0) {
+      //store the sensor value from the potentiometer 
       sensorValue = int(line.trim());
     }
   }
 
-  // map potentiometer to wind force
+  //map the potentiometer value to the wind force
   wind.x = map(sensorValue, 0, 1023, -1, 1);
 
-  // ---- physics ----
+  //add the wind force to the ball
   applyForce(wind);
+  //add gravity 
   applyForce(gravity);
+  //update the ball speed 
   velocity.add(acceleration);
+  //simulate the air resistance 
   velocity.mult(drag);
+  //move the ball 
   position.add(velocity);
+  //reset the acceleration to 0
   acceleration.mult(0);
 
+  //create the ball
   ellipse(position.x, position.y, mass, mass);
 
-  // ---- bounce detection ----
-  let isBouncing = false;
+  //boolean to detect if the ball bounced or not
+  let isBounced = false;
 
+  //if the ball reached the ground, bounce it back and with reduced speed
   if (position.y > height - mass / 2) {
     velocity.y *= -0.9; 
+    //prevent the ball from sinking into the floor 
     position.y = height - mass / 2;
-    isBouncing = true;
+    //set it to true 
+    isBounced = true;
   }
-
-  // ---- send LED control ----
-  if (isBouncing && ledState === 0) {
-    port.write("1");   // turn LED ON
+  
+  //if the ball reached the floor and the led is currently off
+  if (isBounced && ledState === 0) {
+    //turn the LED on 
+    port.write("1");
+    //set the state to 1
     ledState = 1;
   } 
-  else if (!isBouncing && ledState === 1) {
-    port.write("0");   // turn LED OFF
+  else if (!isBounced && ledState === 1) {
+    //turn the led off
+    port.write("0");
     ledState = 0;
   }
 }
 
+//function to apply the force to the ball
 function applyForce(force) {
   let f = p5.Vector.div(force, mass);
   acceleration.add(f);
